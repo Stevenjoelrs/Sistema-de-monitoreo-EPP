@@ -3,3 +3,6 @@ images
 resultados
 
 *.pt
+
+.env
+__pycache__
