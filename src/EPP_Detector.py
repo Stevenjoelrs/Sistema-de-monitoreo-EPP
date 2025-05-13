@@ -13,7 +13,7 @@ class YOLOApp(QWidget):
         self.setWindowTitle("Monitoreo EPP")
         self.setGeometry(100, 100, 800, 600)
 
-        self.modelo_ruta = 'models/lastColab.pt'
+        self.modelo_ruta = 'models/best.pt'
         self.input_path = None
         self.modelo = YOLO(self.modelo_ruta)
         self.cap = None
@@ -158,21 +158,28 @@ class YOLOApp(QWidget):
         clases_detectadas = [int(cls) for cls in resultados.boxes.cls.tolist()]
         nombres_clases = [self.modelo.names[cls] for cls in clases_detectadas]
 
-        epp_requerido = {'helmet', 'vest', 'gloves'}
-        epp_detectado = set(nombres_clases)
+    # Filtramos las clases no deseadas
+        clases_no_deseadas = {'NO-Mask', 'Safety Cone', 'Vehicle'}
+        clases_filtradas = [nombre for nombre in nombres_clases if nombre not in clases_no_deseadas]
+
+    # Actualizamos las clases de EPP requeridas
+        epp_requerido = {'Hardhat', 'Safety Vest'}  # Casco y chaleco son los EPP clave
+        epp_detectado = set(clases_filtradas)
 
         if epp_detectado >= epp_requerido:
-            color = (0, 255, 0)  # Verde
+            color = (0, 255, 0)  # Verde si todos los EPP están presentes
         elif epp_detectado & epp_requerido:
-            color = (0, 255, 255)  # Amarillo
+            color = (0, 255, 255)  # Amarillo si algunos EPP están presentes
         else:
-            color = (0, 0, 255)  # Rojo
+            color = (0, 0, 255)  # Rojo si no se detectan EPP
+
 
         for box, cls in zip(resultados.boxes.xyxy, resultados.boxes.cls):
             x1, y1, x2, y2 = map(int, box)
             label = self.modelo.names[int(cls)]
-            cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
-            cv2.putText(img, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 
+            if label in clases_filtradas:
+                cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+                cv2.putText(img, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 
                         0.9, color, 2)
         return img
 
