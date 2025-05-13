@@ -7,6 +7,10 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtCore import Qt, QTimer
 from ultralytics import YOLO
+from telegram_bot.Main import iniciar_bot
+from telegram_bot.utils.Notifier import notify_group
+from multiprocessing import Process
+from utils.Run_Async_Task import run_async_task
 import cv2
 
 
@@ -228,7 +232,13 @@ class YOLOApp(QWidget):
 
 
 if __name__ == "__main__":
+    bot_process = Process(target=iniciar_bot)
+    bot_process.start()
+    
     app = QApplication(sys.argv)
     ventana = YOLOApp()
     ventana.show()
     sys.exit(app.exec_())
+    
+    bot_process.terminate()
+    sys.exit(exit_code)
