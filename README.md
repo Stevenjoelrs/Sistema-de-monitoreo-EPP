@@ -65,7 +65,7 @@ Componentes principales:
    * modelo_guantes_botas: YOLO para guantes y botas.
    * Sistema de colores para indicar cumplimiento de EPP.
   
-3. Integracíon con Telegram:
+## Integracíon con Telegram:
 
    
 ## Metodos clave:
