@@ -202,7 +202,7 @@ class YOLOApp(QWidget):
 
     def dibujar_cuadros_personalizados(self, img, resultados_epp, resultados_guantes_botas):
         clases_no_deseadas = {'NO-Mask', 'Safety Cone', 'Vehicle'}
-        epp_requerido = {'Hardhat', 'Safety Vest', '0'}
+        epp_requerido = {'Hardhat', 'Safety Vest', '0', '1'}
         epp_detectado = set()
         for box, cls in zip(resultados_epp.boxes.xyxy, resultados_epp.boxes.cls):
             x1, y1, x2, y2 = map(int, box)
