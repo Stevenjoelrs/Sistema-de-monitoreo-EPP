@@ -65,7 +65,27 @@ Componentes principales:
    * modelo_guantes_botas: YOLO para guantes y botas.
    * Sistema de colores para indicar cumplimiento de EPP.
   
-## Integracíon con Telegram:
+## Integración con Telegram
+
+El sistema incluye una integración con Telegram para enviar notificaciones sobre el cumplimiento del EPP. Sigue estos pasos para configurar la integración:
+
+### 1. Crear un bot en Telegram
+1. Abre Telegram y busca el usuario `@BotFather`.
+2. Inicia una conversación con `@BotFather` y usa el comando `/newbot` para crear un nuevo bot.
+3. Sigue las instrucciones y, al finalizar, recibirás un **token** de acceso para tu bot. Este token será necesario más adelante.
+
+### 2. Obtener el ID del chat
+Para enviar notificaciones a un grupo:
+   - Crea un grupo en Telegram e invita al bot que creaste al grupo.
+   - Encontraras el id del grupo en la url `web.telegram.org/k/#<id>` el `id` es el que necesitaremos.
+
+### 3. Crear el archivo `.env`
+Crea un archivo llamado `.env` en la raíz del proyecto y agrega las siguientes variables de entorno:
+
+``` bash
+BOT_TOKEN=<TOKEN_DEL_BOT>
+ALERT_CHAT_ID=<ID_DEL_CHAT>
+```
 
    
 ## Metodos clave:
