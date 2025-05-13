@@ -97,12 +97,13 @@ Codigo de colores en las detecciones:
 ## Estructura de Directorios:
 
 ```
-├── models/               # Modelos YOLO
 ├── src/
-│   ├── assets/           # Recursos gráficos
+|   |── model/             # Modelos YOLO 
+│   └── assets/           # Recursos gráficos
 │   └── telegram_bot/     # Código del bot
-├── utils/                # Utilidades
-├── main.py               # Aplicación principal
+|   └── utils/
+|   └── EPP_Detector.py   # Codigo principal
+├── requirements.txt
 └── README.md             # Documentación
 ```
 
