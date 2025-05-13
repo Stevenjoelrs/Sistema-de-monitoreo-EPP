@@ -1,0 +1,5 @@
+PyQt5==5.15.7
+opencv-python==4.5.5.64
+ultralytics==8.0.0
+python-telegram-bot==20.0
+numpy==1.23.5
