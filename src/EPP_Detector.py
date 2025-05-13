@@ -1,4 +1,5 @@
 import sys
+import io
 import threading
 from PyQt5.QtWidgets import (
     QApplication, QLabel, QVBoxLayout, QWidget,
@@ -11,6 +12,7 @@ from telegram_bot.Main import iniciar_bot
 from telegram_bot.utils.Notifier import notify_group
 from multiprocessing import Process
 from utils.Run_Async_Task import run_async_task
+from model.Report import Report
 import cv2
 
 
@@ -159,7 +161,10 @@ class YOLOApp(QWidget):
             self.label_original.hide()
             self.btn_camara_detener.setEnabled(True)
             self.video_thread = threading.Thread(target=self.leer_camara)
+            self.reporte_timer = QTimer()
             self.video_thread.start()
+            self.reporte_timer.timeout.connect(self.generar_reporte)
+            self.reporte_timer.start(30000)
 
     def leer_camara(self):
         while self.cap.isOpened():
@@ -183,6 +188,9 @@ class YOLOApp(QWidget):
         self.label_resultado.clear()
         self.label_original.show()
         self.btn_camara_detener.setEnabled(False)
+        if hasattr(self, 'reporte_timer') and self.reporte_timer.isActive():
+            self.reporte_timer.stop()
+
 
     def actualizar_video(self):
         ret, frame = self.cap.read()
@@ -216,7 +224,7 @@ class YOLOApp(QWidget):
             epp_detectado.add(label)
             cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 2)
             cv2.putText(img, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
-
+        self.epp_ultimo_detectado = epp_detectado
         if epp_detectado >= epp_requerido:
             color_epp = (0, 255, 0)
         elif epp_detectado & epp_requerido:
@@ -238,6 +246,37 @@ class YOLOApp(QWidget):
         if self.timer.isActive():
             self.timer.stop()
         event.accept()
+    
+    def generar_reporte(self):
+        threading.Thread(target=self._generar_reporte_en_hilo, daemon=True).start()
+
+    def _generar_reporte_en_hilo(self):
+        if not hasattr(self, 'epp_ultimo_detectado'):
+            return
+
+        epp_detectado = self.epp_ultimo_detectado
+        epp_requerido = {'Hardhat', 'Safety Vest', '0', '1'}
+
+        if epp_detectado >= epp_requerido:
+            estado = "✅ Cumple con todo el EPP requerido"
+        elif epp_detectado & epp_requerido:
+            estado = "⚠️ Cumple parcialmente con el EPP"
+        else:
+            estado = "❌ No cumple con el EPP requerido"
+
+        mensaje = f"📋 Reporte EPP:\nObjetos Detectados: {', '.join(epp_detectado)}\nEstado: {estado}"
+        print(mensaje)
+
+        if self.cap and self.cap.isOpened():
+            ret, frame = self.cap.read()
+            if ret:
+                resultados_epp = self.modelo_epp(frame)[0]
+                resultados_guantes_botas = self.modelo_guantes_botas(frame)[0]
+                frame = self.dibujar_cuadros_personalizados(frame, resultados_epp, resultados_guantes_botas)
+                _, buffer = cv2.imencode('.jpg', frame)
+                image_stream = io.BytesIO(buffer)
+                reporte = Report(image=image_stream, message=mensaje)
+                run_async_task(reporte.enviar_reporte())    
 
 
 if __name__ == "__main__":
