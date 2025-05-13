@@ -11,8 +11,43 @@ Este sistema usa modelos YOLO para identificar elementos de seguridad como casco
 
 # Dependencias
 
-instala las dependencias con:
+La lista de dependencias estan en `requirements.txt`.
+
+# Instalación
+
+Clonar el repositorio:
+
+```
+git clone https://github.com/Stevenjoelrs/Sistema-de-monitoreo-EPP.git
+cd Sistema-de-monitoreo-EPP
+```
+
+Crear entorno virtual (recomendado):
+
+```
+python -m venv venv
+
+source venv/bin/activate  # Linux/Mac
+
+venv\Scripts\activate     # Windows
+```
+
+Instalar dependencias:
 
 ```
 pip install -r requirements.txt
 ```
+
+Descargar los modelos YOLO y colocarlos en una carpeta `models/`:
+
+* best.pt (modelo principal de EPP)
+* bestBotas.pt (modelo para reconocer guantes y botas)
+
+# Uso
+
+Ejecuta la aplicación con:
+
+```
+python3 main.py
+```
+
