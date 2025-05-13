@@ -48,7 +48,7 @@ Descargar los modelos YOLO y colocarlos en una carpeta `models/`:
 Ejecuta la aplicación con:
 
 ```
-python3 main.py
+python3 EPP_Detector.py
 ```
 
 # Estructura del Código
