@@ -32,8 +32,8 @@ class YOLOApp(QWidget):
         self.center_title = QLabel("SISTEMA DE DETECCIÓN DE EPP")
         self.right_logo = QLabel()
 
-        self.left_logo.setPixmap(QPixmap("src/assets/images/logo.png").scaled(80, 80, Qt.KeepAspectRatio))
-        self.right_logo.setPixmap(QPixmap("src/assets/images/umss.png").scaled(80, 80, Qt.KeepAspectRatio))
+        self.left_logo.setPixmap(QPixmap("src/assets/pictures/logo.png").scaled(80, 80, Qt.KeepAspectRatio))
+        self.right_logo.setPixmap(QPixmap("src/assets/pictures/umss.png").scaled(80, 80, Qt.KeepAspectRatio))
         self.center_title.setAlignment(Qt.AlignCenter)
         self.center_title.setStyleSheet("color: #DCE3EC; font-size: 24px; font-weight: bold;")
 
