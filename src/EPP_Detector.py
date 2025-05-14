@@ -25,6 +25,7 @@ class YOLOApp(QWidget):
 
         self.modelo_epp = YOLO('models/best.pt') 
         self.modelo_guantes_botas = YOLO('models/bestBotas.pt')
+        self.modelo_arnes = YOLO('models/lastArnes.pt')
         self.input_path = None
         self.cap = None
         self.timer = QTimer()
@@ -138,7 +139,9 @@ class YOLOApp(QWidget):
         img = cv2.imread(self.input_path)
         resultados_epp = self.modelo_epp(img)[0]
         resultados_guantes_botas = self.modelo_guantes_botas(img)[0]
-        img = self.dibujar_cuadros_personalizados(img, resultados_epp, resultados_guantes_botas)
+        resultados_arnes = self.modelo_arnes(img)[0]
+        img = self.dibujar_cuadros_personalizados(img, resultados_epp, resultados_guantes_botas, resultados_arnes)
+
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         h, w, ch = img.shape
         bytes_per_line = ch * w
@@ -173,7 +176,9 @@ class YOLOApp(QWidget):
                 break
             resultados_epp = self.modelo_epp(frame)[0]
             resultados_guantes_botas = self.modelo_guantes_botas(frame)[0]
-            frame = self.dibujar_cuadros_personalizados(frame, resultados_epp, resultados_guantes_botas)
+            resultados_arnes = self.modelo_arnes(frame)[0]
+            frame = self.dibujar_cuadros_personalizados(frame, resultados_epp, resultados_guantes_botas, resultados_arnes)
+
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             h, w, ch = frame.shape
             bytes_per_line = ch * w
@@ -199,7 +204,8 @@ class YOLOApp(QWidget):
             return
         resultados_epp = self.modelo_epp(frame)[0]
         resultados_guantes_botas = self.modelo_guantes_botas(frame)[0]
-        frame = self.dibujar_cuadros_personalizados(frame, resultados_epp, resultados_guantes_botas)
+        resultados_arnes = self.modelo_arnes(frame)[0]
+        frame = self.dibujar_cuadros_personalizados(frame, resultados_epp, resultados_guantes_botas, resultados_arnes)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         h, w, ch = frame.shape
         bytes_per_line = ch * w
@@ -208,36 +214,41 @@ class YOLOApp(QWidget):
         self.label_resultado.setPixmap(pixmap.scaled(
             self.label_resultado.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
-    def dibujar_cuadros_personalizados(self, img, resultados_epp, resultados_guantes_botas):
+    def dibujar_cuadros_personalizados(self, img, resultados_epp, resultados_guantes_botas, resultados_arnes):
         clases_no_deseadas = {'NO-Mask', 'Safety Cone', 'Vehicle'}
-        epp_requerido = {'Hardhat', 'Safety Vest', '0', '1'}
+        epp_requerido = {'Hardhat', 'Safety Vest', '0', '1', 'belt'}
         epp_detectado = set()
+        detecciones_totales = []
+
         for box, cls in zip(resultados_epp.boxes.xyxy, resultados_epp.boxes.cls):
-            x1, y1, x2, y2 = map(int, box)
             label = self.modelo_epp.names[int(cls)]
             if label not in clases_no_deseadas:
                 epp_detectado.add(label)
+                detecciones_totales.append((box, label))
 
         for box, cls in zip(resultados_guantes_botas.boxes.xyxy, resultados_guantes_botas.boxes.cls):
-            x1, y1, x2, y2 = map(int, box)
             label = self.modelo_guantes_botas.names[int(cls)]
             epp_detectado.add(label)
-            cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 0), 2)
-            cv2.putText(img, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 0, 0), 2)
-        self.epp_ultimo_detectado = epp_detectado
-        if epp_detectado >= epp_requerido:
-            color_epp = (0, 255, 0)
-        elif epp_detectado & epp_requerido:
-            color_epp = (0, 255, 255)
-        else:
-            color_epp = (0, 0, 255)
+            detecciones_totales.append((box, label))
 
-        for box, cls in zip(resultados_epp.boxes.xyxy, resultados_epp.boxes.cls):
+        for box, cls in zip(resultados_arnes.boxes.xyxy, resultados_arnes.boxes.cls):
+            label = self.modelo_arnes.names[int(cls)]
+            epp_detectado.add(label)
+            detecciones_totales.append((box, label))
+
+        if epp_detectado >= epp_requerido:
+            color_epp = (0, 255, 0)     
+        elif epp_detectado & epp_requerido:
+            color_epp = (0, 255, 255)    
+        else:
+            color_epp = (0, 0, 255)      
+
+        for box, label in detecciones_totales:
             x1, y1, x2, y2 = map(int, box)
-            label = self.modelo_epp.names[int(cls)]
-            if label not in clases_no_deseadas:
-                cv2.rectangle(img, (x1, y1), (x2, y2), color_epp, 2)
-                cv2.putText(img, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color_epp, 2)
+            cv2.rectangle(img, (x1, y1), (x2, y2), color_epp, 2)
+            cv2.putText(img, label, (x1, y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, color_epp, 2)
+
         return img
 
     def closeEvent(self, event):
@@ -255,7 +266,7 @@ class YOLOApp(QWidget):
             return
 
         epp_detectado = self.epp_ultimo_detectado
-        epp_requerido = {'Hardhat', 'Safety Vest', '0', '1'}
+        epp_requerido = {'Hardhat', 'Safety Vest', '0', '1', 'belt'}
 
         if epp_detectado >= epp_requerido:
             estado = "✅ Cumple con todo el EPP requerido"
@@ -272,7 +283,9 @@ class YOLOApp(QWidget):
             if ret:
                 resultados_epp = self.modelo_epp(frame)[0]
                 resultados_guantes_botas = self.modelo_guantes_botas(frame)[0]
-                frame = self.dibujar_cuadros_personalizados(frame, resultados_epp, resultados_guantes_botas)
+                resultados_arnes = self.modelo_arnes(frame)[0]
+                frame = self.dibujar_cuadros_personalizados(frame, resultados_epp, resultados_guantes_botas, resultados_arnes)
+
                 _, buffer = cv2.imencode('.jpg', frame)
                 image_stream = io.BytesIO(buffer)
                 reporte = Report(image=image_stream, message=mensaje)
