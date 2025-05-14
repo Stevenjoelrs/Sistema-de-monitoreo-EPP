@@ -39,8 +39,8 @@ class YOLOApp(QWidget):
         self.center_title = QLabel("SISTEMA DE DETECCIÓN DE EPP")
         self.right_logo = QLabel()
 
-        self.left_logo.setPixmap(QPixmap("src/assets/pictures/logo.png").scaled(180, 180, Qt.KeepAspectRatio))
-        self.right_logo.setPixmap(QPixmap("src/assets/pictures/umss.png").scaled(180, 160, Qt.KeepAspectRatio))
+        self.left_logo.setPixmap(QPixmap("src/assets/pictures/logo.png").scaled(80, 80, Qt.KeepAspectRatio))
+        self.right_logo.setPixmap(QPixmap("src/assets/pictures/umss.png").scaled(80, 80, Qt.KeepAspectRatio))
         self.center_title.setAlignment(Qt.AlignCenter)
         self.center_title.setStyleSheet("color: #DCE3EC; font-size: 24px; font-weight: bold;")
 
@@ -53,12 +53,12 @@ class YOLOApp(QWidget):
 
         self.label_original = QLabel("Imagen original aparecerá aquí")
         self.label_original.setAlignment(Qt.AlignCenter)
-        self.label_original.setStyleSheet("color: white; font-size: 18px; font-weight: bold;")
+        self.label_original.setStyleSheet("color: white;")
         self.label_original.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.label_resultado = QLabel("Resultado aparecerá aquí")
         self.label_resultado.setAlignment(Qt.AlignCenter)
-        self.label_resultado.setStyleSheet("color: white; font-size: 18px; font-weight: bold;")
+        self.label_resultado.setStyleSheet("color: white;")
         self.label_resultado.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.content_layout = QHBoxLayout()
