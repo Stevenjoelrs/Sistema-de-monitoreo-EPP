@@ -249,6 +249,8 @@ class YOLOApp(QWidget):
             cv2.putText(img, label, (x1, y1 - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.9, color_epp, 2)
 
+            self.epp_ultimo_detectado = epp_detectado
+
         return img
 
     def closeEvent(self, event):
